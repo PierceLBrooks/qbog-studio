@@ -1,0 +1,59 @@
+[gd_scene load_steps=6 format=3 uid="uid://jlwes7y2yq4x"]
+
+[ext_resource type="Script" path="res://free_look_camera.gd" id="1_4l5lf"]
+[ext_resource type="Script" path="res://AutoSplitContainer.gd" id="2_3op46"]
+[ext_resource type="Script" path="res://Join.gd" id="3_0k2hh"]
+[ext_resource type="Script" path="res://Host.gd" id="4_5hmcv"]
+[ext_resource type="Script" path="res://bvh.gd" id="5_q1pc1"]
+
+[node name="Root" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.642306, -0.347639, 0.683074, 4.19976e-17, 0.89122, 0.453571, -0.766448, -0.291332, 0.572436, 1.00885, 0.787829, 1.30786)
+script = ExtResource("1_4l5lf")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Camera3D"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+
+[node name="UI" type="HSplitContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("2_3op46")
+
+[node name="CenterContainerLeft" type="CenterContainer" parent="UI"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="UI/CenterContainerLeft"]
+layout_mode = 2
+text = "Join"
+script = ExtResource("3_0k2hh")
+
+[node name="CenterContainerRight" type="VSplitContainer" parent="UI"]
+layout_mode = 2
+script = ExtResource("2_3op46")
+
+[node name="CenterContainer" type="CenterContainer" parent="UI/CenterContainerRight"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="UI/CenterContainerRight/CenterContainer"]
+layout_mode = 2
+text = "Host"
+script = ExtResource("4_5hmcv")
+
+[node name="FileDialog" type="FileDialog" parent="UI/CenterContainerRight/CenterContainer/Button"]
+
+[node name="TextEdit" type="TextEdit" parent="UI/CenterContainerRight"]
+layout_mode = 2
+placeholder_text = "127.0.0.1:42690"
+
+[node name="BVH" type="Container" parent="."]
+visible = false
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("5_q1pc1")
