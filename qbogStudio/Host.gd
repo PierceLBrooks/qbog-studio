@@ -27,4 +27,7 @@ func _on_file_select(file: String):
 		return
 	var script = get_tree().get_root().get_node("Root").find_child("BVH").get_script()
 	var child = script.load_bvh_filename(file)
-	get_tree().get_root().get_node("Root").add_child(child)
+	print(str(child))
+	if child == null:
+		return
+	#get_tree().get_root().get_node("Root").add_child(child)

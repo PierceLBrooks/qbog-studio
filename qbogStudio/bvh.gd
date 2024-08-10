@@ -126,6 +126,15 @@ static func get_config_data(that: Node = null) -> Dictionary:
 	# This will do all of the node reading and accessing, next to ready.
 	var config = Dictionary()
 	if that == null:
+		config[SKELETON_PATH] = "/Root/Skeleton3D"
+		config[ANIM_PLAYER_NAME] = "/Root/AnimationPlayer"
+		config[NEW_ANIM_NAME] = "BVH"
+		config[IGNORE_OFFSETS] = false
+		config[TRANSFORM_SCALING] = 1.0
+		config[AXIS_ORDER] = AXIS_ORDERING.NATIVE
+		config[RIGHT_VECTOR] = Vector3(1.0, 0.0, 0.0)
+		config[UP_VECTOR] = Vector3(0.0, 1.0, 0.0)
+		config[FORWARD_VECTOR] = Vector3(0.0, 0.0, 1.0)
 		return config
 	config[SKELETON_PATH] = that.skeleton_path_input.text
 	config[ANIM_PLAYER_NAME] = that.animation_player_name_input.text
@@ -233,7 +242,12 @@ static func load_bvh_filename(filename: String, that: Node = null) -> Animation:
 	var bone_index_map:Dictionary = hdata[2]
 	var bone_offsets:Dictionary = hdata[3]
 	
-	return parse_motion(root_bone_name, bone_names, bone_index_map, bone_offsets, motion_lines, that)
+	var children = parse_motion(root_bone_name, bone_names, bone_index_map, bone_offsets, motion_lines, that)
+	if (len(children) < 2):
+		return null
+	var child = children[0]
+	var animation = children[1]
+	return child
 
 static func parse_bvh(fulltext: String, that: Node = null) -> Array:
 	# Split the fulltext by the elements from HIERARCHY to MOTION, and MOTION until the end of file.
@@ -321,11 +335,13 @@ static func parse_hierarchy(text: Array, that: Node = null):# -> [String, Array,
 	return [root_bone, bone_names, bone_index_map, bone_offsets]
 
 # WARNING: This method will mutate the input text array.
-static func parse_motion(root: String, bone_names: Array, bone_index_map: Dictionary, bone_offsets: Dictionary, text: Array, that: Node = null) -> Animation:
+static func parse_motion(root: String, bone_names: Array, bone_index_map: Dictionary, bone_offsets: Dictionary, text: Array, that: Node = null) -> Array:
+	var output = null
 	var config = get_config_data(that)
 	
 	if not SKELETON_PATH in config:
-		return null
+		printerr("SKELETON_PATH is null.")
+		return []
 	
 	var rig_name = config[SKELETON_PATH]
 	
@@ -411,7 +427,7 @@ static func parse_motion(root: String, bone_names: Array, bone_index_map: Dictio
 			# CAVEAT SCRIPTOR: rotation_*_index is not valid after this operation!
 			
 			# Apply bone-name remapping _just_ before we actually set the track.
-			if config[BONE_REMAPPING_JSON].has(bone_name):
+			if config.has(BONE_REMAPPING_JSON) and config[BONE_REMAPPING_JSON].has(bone_name):
 				bone_name = config[BONE_REMAPPING_JSON][bone_name]
 				# TODO: Option to skip unmapped bones.  Leaving as is for now because people can remove them manually.
 			
@@ -426,7 +442,7 @@ static func parse_motion(root: String, bone_names: Array, bone_index_map: Dictio
 			#animation.track_insert_key(track_index, step*timestep, transform)
 		step += 1
 	
-	return animation
+	return [output, animation]
 
 class FirstIndexSort:
 	static func sort_ascending(a, b):
